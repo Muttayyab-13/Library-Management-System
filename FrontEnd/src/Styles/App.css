@@ -1,0 +1,29 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Gupter:wght@400;500;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+
+
+body {
+  font-family: 'Gupter';
+  margin: 0;
+  padding: 0;
+}
+
+.navbar {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.admin-sidebar {
+  width: 200px;
+  background-color: #f4f4f4;
+  padding: 20px;
+}
+
+.book-card {
+  border: 1px solid #ddd;
+  padding: 10px;
+  width: 200px;
+}

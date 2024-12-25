@@ -1,0 +1,112 @@
+@import url("https://fonts.googleapis.com/css2?family=Gupter:wght@400;500;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap");
+
+@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&display=swap');
+
+body {
+  width: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  margin: auto;
+  font-family: 'LoRa';
+
+  background-color: rgb(224, 222, 219);
+}
+
+.frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  box-shadow: inset;
+  background-color: white;
+  padding: 30px;
+  border-radius: 20px;
+}
+
+.form h2 {
+  line-height: 2px;
+  align-self: flex-start;
+}
+
+.form h4 {
+  font-weight: 100;
+  cursor: pointer;
+}
+
+p {
+  cursor: pointer;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.pic-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 25px;
+  background-color: rgb(255, 218, 6);
+  padding: 15px;
+  height: 100%;
+  border-radius: 15px;
+  color: rgb(21, 107, 110);
+}
+
+.pic-container img {
+  border-radius: 65px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 25px;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 300px;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+input {
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  height: 30px;
+}
+.Login {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.forgot-pw {
+  font-size: medium;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  font-size: small;
+  font-weight: 500;
+}
+
+span{
+  line-height: 2px;
+}
