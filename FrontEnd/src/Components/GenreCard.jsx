@@ -4,7 +4,7 @@ import "../Styles/Componenets.css";
 const GenreCard = ({ genre }) => (
   <div className="genre-card">
     <h3>{genre.name}</h3>
-    <p>{genre.description}</p>
+    <p>{genre.descriptions}</p>
   </div>
 );
 

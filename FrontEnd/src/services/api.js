@@ -15,6 +15,15 @@ export const getAllBooks = () => {
     });
 };
 
+export const getGenres = () => {
+  return axios.get('http://localhost:3001/genres/get')  // Adjust the URL to match your API
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error fetching genres:', error);
+      throw error;
+    });
+};
+
 
 
 export const getBooks = async () => {
@@ -69,7 +78,3 @@ export const getFeaturedBooks = async () => {
   return response.json();
 };
 
-export const getGenres = async () => {
-  const response = await fetch(`${API_URL}/genres`);
-  return response.json();
-};

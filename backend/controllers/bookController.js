@@ -36,6 +36,7 @@ const getAllBooks = async (req, res) => {
 
 
 
+
 // Get featured books
 const getFeaturedBooks = async (req, res) => {
   try {

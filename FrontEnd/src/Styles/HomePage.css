@@ -1,7 +1,10 @@
+
+
 .hero {
     text-align: center;
     padding: 40px 20px;
     background-color: #f8f9fa;
+   
   }
   
   .featured-books, .genres {
@@ -34,3 +37,4 @@
     background-color: #0056b3;
   }
   
+ 

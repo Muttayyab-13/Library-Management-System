@@ -41,4 +41,16 @@
   .admin-table th {
     background-color: #f4f4f4;
   }
+
+  .book-card
+  {
+    border: black 1px solid;
+   padding: 1px;
+   background-color: rgb(166, 207, 207);
+  }
   
+  .genre-card{
+    border: black 1px solid;
+    padding: 1px;
+    background-color: rgb(166, 207, 207);
+  }

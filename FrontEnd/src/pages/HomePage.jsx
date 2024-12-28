@@ -23,7 +23,7 @@ const HomePage = () => {
   };
 
   return (
-    <div>
+    <div className="main">
       <header className="hero">
         <h1>Welcome to the Online Library</h1>
         <p>Find your next great read from our vast collection of books!</p>
