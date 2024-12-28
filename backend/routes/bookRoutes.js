@@ -1,9 +1,9 @@
 const express = require("express");
-const { getBooks, addBook, getFeaturedBooks } = require("../controllers/bookController");
+const { getAllBooks, addBook, getFeaturedBooks } = require("../controllers/bookController");
 
 const router = express.Router();
 
-router.get("/", getBooks);
+router.get("/allBooks", getAllBooks);
 router.get("/featured", getFeaturedBooks);
 router.post("/", addBook);
 

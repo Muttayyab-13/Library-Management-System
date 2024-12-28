@@ -10,6 +10,7 @@ import ManageUsers from "./pages/admin/ManageUsers";
 import ManageGenres from "./pages/admin/ManageGenres";
 import SignIn from "./pages/SignIn/SignIn";
 import SignUp from "./pages/SignUp/SignUp";
+import UserDashboard from "./pages/UserDashboard";
 
 const App = () => (
   <Router>
@@ -28,6 +29,7 @@ const App = () => (
         <Route path="/admin/manage-books" element={<ManageBooks />} />
         <Route path="/admin/manage-users" element={<ManageUsers />} />
         <Route path="/admin/manage-genres" element={<ManageGenres />} />
+        <Route path="/userDashboard" element={<UserDashboard />} />
       </Routes>
     </div>
     <Footer /> {/*  */}

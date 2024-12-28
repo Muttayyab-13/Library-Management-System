@@ -1,12 +1,14 @@
 const express = require("express");
+
 const sql = require("mssql");
-const {registerUser} = require("../controllers/userController");
+
+const {registerUser, signInUser} = require("../controllers/userController");
 
 const router = express.Router();
 
 // Endpoint: Register a new user
 router.post("/addUser",registerUser);
-
+router.post("/user",signInUser)
 
 
 

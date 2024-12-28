@@ -1,4 +1,21 @@
-const API_URL = "http://localhost:5000/api";
+import axios from 'axios';
+
+
+const API_URL = "http://localhost:3001/backend";
+
+
+
+
+export const getAllBooks = () => {
+  return axios.get('http://localhost:3001/books/allBooks')
+    .then(response => response.data)  // Axios provides the response data directly
+    .catch(error => {
+      console.error('Error fetching books:', error);
+      throw error;  // Rethrow or handle error accordingly
+    });
+};
+
+
 
 export const getBooks = async () => {
   const res = await fetch(`${API_URL}/books`);

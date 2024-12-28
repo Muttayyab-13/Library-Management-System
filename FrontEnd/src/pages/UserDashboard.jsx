@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import NotificationCard from "../Components/NotificationCard";
-import { getUserNotifications, getUserBorrowRecords } from "../Services/api";
+import { getUserNotifications, getUserBorrowRecords } from "../services/api";
 
 const UserDashboard = () => {
   const [notifications, setNotifications] = useState([]);

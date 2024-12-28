@@ -25,14 +25,14 @@ const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
-    const response = await axios.post("http://localhost:3000/api/signin", {
+    const response = await axios.post("http://localhost:3001/signIn/user", {
       Email: formData.Email,
       Password: formData.Password,
     });
 
     if (response.data.success) {
       const { token, user } = response.data;
-      console.log(user); // Destructure the token and user data
+      console.log(user);  // Destructure the token and user data
       localStorage.setItem("token", token); // Store the token securely
 console.log(user.email);
 
@@ -46,7 +46,7 @@ console.log(user.email);
 
 
       else {
-        navigate("/MainPage"); // Navigate to the main page for regular users
+        navigate("/homePage"); // Navigate to the main page for regular users
       }
     } else {
       setErrors({

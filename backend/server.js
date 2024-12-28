@@ -53,6 +53,7 @@ app.use("/books", bookRoutes);
 app.use("/genres", genreRoutes);
 app.use("/admin", adminRoutes);
 app.use("/register", userRoutes);
+app.use("/signIn", userRoutes);
 
 // Start the Server
 const port = 3001;

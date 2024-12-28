@@ -1,15 +1,40 @@
-const { connectToDatabase, sql } = require("../server.js");
+const sql=require('mssql');
+const { connectToDatabase } = require('../server'); // Ensure this is importing your connection function
 
-// Get all books
-const getBooks = async (req, res) => {
+
+const getAllBooks = async (req, res) => {
   try {
-    const pool = await connectDB();
-    const result = await pool.request().query("SELECT * FROM Books");
+    // Connect to the database using the pool connection
+    const pool = await sql.connect(connectToDatabase);
+
+    // Execute the query
+    const result = await pool.request().query(`
+      SELECT 
+        b.ISBN,
+        g.name AS genre,
+        b.title,
+        p.name AS publisher,
+        a.name AS author
+      FROM 
+        BooksCopies1 b
+      JOIN 
+        Genres g ON b.genre_id = g.id
+      JOIN 
+        Publishers p ON b.publisher_id = p.id
+      JOIN 
+        Authors a ON b.author_id = a.id;
+    `);
+
+    // Send the result back as JSON
     res.status(200).json(result.recordset);
   } catch (error) {
+    // Handle any errors
+    console.error('Error fetching books:', error);
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 // Get featured books
 const getFeaturedBooks = async (req, res) => {
@@ -45,4 +70,4 @@ const addBook = async (req, res) => {
   }
 };
 
-module.exports = { getBooks, getFeaturedBooks, addBook };
+module.exports = { getAllBooks, getFeaturedBooks, addBook };
