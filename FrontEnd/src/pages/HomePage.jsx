@@ -8,19 +8,27 @@ import "../Styles/Componenets.css";
 
 const HomePage = () => {
   const [books, setBooks] = useState([]);
+  
+  const [featuredBooks, setFeaturedBooks] = useState([]);
+
   const [genres, setGenres] = useState([]);
   const [showAllBooks, setShowAllBooks] = useState(false);  // Track whether to show all books
 
   useEffect(() => {
     // Fetch featured books and genres on component mount
-    getFeaturedBooks().then(setBooks).catch(console.error);
+    getFeaturedBooks().then(setFeaturedBooks).catch(console.error);
+    getAllBooks().then(setBooks).catch(console.error);
     getGenres().then(setGenres).catch(console.error);
+
+    
   }, []);
 
-  const handleShowAllBooks = () => {
-    getAllBooks().then(setBooks).catch(console.error);  // Fetch all books when button is clicked
-    setShowAllBooks(true);
+  const handleToggleBooks = () => {
+    // Toggle the visibility of books when the button is clicked
+    setShowAllBooks(!showAllBooks);
   };
+
+
 
   return (
     <div className="main">
@@ -33,26 +41,33 @@ const HomePage = () => {
       <section className="featured-books">
         <h2>Featured Books</h2>
         <div className="grid">
-          {books.length > 0 ? (
-            books.map((book) => <BookCard key={book.id} book={book} />)
+          {featuredBooks.length > 0 ? (
+            featuredBooks.map((book) => <BookCard key={book.id} book={book} />)
           ) : (
             <p>No books available.</p>
           )}
         </div>
+        <div>
+        <h2>All Books</h2>
+
         
         {/* Button to show all books */}
-        {!showAllBooks && (
-          <button className="show-all-books-btn" onClick={handleShowAllBooks}>
-            Show All Books
-          </button>
-        )}
+        <button onClick={handleToggleBooks} style={{ marginBottom: '15px' }}>
+        {showAllBooks ? "Hide Books" : "Show Books"}
+      </button>
+        {showAllBooks &&  (books.length > 0 ? (
+            books.map((book) => <BookCard key={book.id} book={book} />)
+           ): (
+            <p>No books available.</p>
+          ))}
+      </div>
       </section>
 
       <section className="genres">
         <h2>Browse by Genres</h2>
         <div className="grid">
           {genres.length > 0 ? (
-            genres.map((genre) => <GenreCard key={genre.id} genre={genre} />)
+            genres.map((genre) => <GenreCard key={genre.name} genre={genre} books={books} />)
           ) : (
             <p>No genres available.</p>
           )}

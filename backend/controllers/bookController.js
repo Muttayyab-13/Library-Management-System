@@ -23,7 +23,7 @@ const getAllBooks = async (req, res) => {
         Publishers p ON b.publisher_id = p.id
       JOIN 
         Authors a ON b.author_id = a.id;
-    `);
+    `  );
 
     // Send the result back as JSON
     res.status(200).json(result.recordset);
@@ -40,15 +40,25 @@ const getAllBooks = async (req, res) => {
 // Get featured books
 const getFeaturedBooks = async (req, res) => {
   try {
-    const pool = await connectToDatabase();
-    const result = await pool
-      .request()
-      .query("SELECT TOP 5 * FROM Books WHERE IsFeatured = 1");
-    res.status(200).json(result.recordset);
+    // Establish a connection to the database
+    const pool = await sql.connect(connectToDatabase);
+
+    // Query to fetch featured books
+    const result = await pool.request()
+      .query(`SELECT b.title,a.name AS author
+        FROM BooksCopies1 b
+        join Authors a on a.id=b.author_id
+        WHERE is_featured = 1`); // Adjust this query based on your schema
+
+
+    // Return the result of the query as a JSON response
+    res.status(200).json(result.recordset); // recordset contains the rows returned from the query
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching featured books from SQL Server:', error);
+    res.status(500).json({ error: 'Failed to fetch featured books from SQL Server' });
   }
 };
+
 
 // Add a new book
 const addBook = async (req, res) => {

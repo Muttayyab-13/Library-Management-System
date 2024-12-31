@@ -73,8 +73,12 @@ export const searchBooks = async (query) => {
   };
 
 
-export const getFeaturedBooks = async () => {
-  const response = await fetch(`${API_URL}/books/featured`);
-  return response.json();
-};
-
+  export const getFeaturedBooks = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3001/books/featured`); 
+      return response.data; // axios returns the response data directly
+    } catch (error) {
+      console.error("Error fetching featured books:", error);
+      throw error; // Rethrow the error to allow further handling by the calling code
+    }
+  };
