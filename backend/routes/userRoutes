@@ -2,14 +2,18 @@ const express = require("express");
 
 const sql = require("mssql");
 
-const {registerUser, signInUser} = require("../controllers/userController");
+const {registerUser, signInUser,getAllUsers,deleteUser,markAsRead,getNotifications} = require("../controllers/userController");
 
 const router = express.Router();
 
 // Endpoint: Register a new user
 router.post("/addUser",registerUser);
 router.post("/user",signInUser)
-
+router.get('/all', getAllUsers);
+router.delete('/delete/:id',deleteUser);
+router.patch('/notifications/:id', markAsRead);
+router.get('notifications/:id', getNotifications);
+ 
 
 
 // Endpoint: Get all users (for admin)

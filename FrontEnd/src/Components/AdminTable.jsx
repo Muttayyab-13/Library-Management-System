@@ -1,30 +1,30 @@
 import React from "react";
 import "../Styles/Componenets.css";
-
 const AdminTable = ({ data, onEdit, onDelete }) => (
   <table>
     <thead>
       <tr>
         {Object.keys(data[0] || {}).map((key) => (
-          <th key={key}>{key}</th>
+          key !== 'id' && <th key={key}>{key}</th>
         ))}
         <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       {data.map((row) => (
-        <tr key={row.id}>
-          {Object.values(row).map((value, idx) => (
-            <td key={idx}>{value}</td>
+        <tr key={row.title}>
+          {Object.entries(row).map(([key, value], idx) => (
+            key !== 'id' && <td key={idx}>{value}</td>
           ))}
           <td>
-            <button onClick={() => onEdit(row)}>Edit</button>
-            <button onClick={() => onDelete(row.id)}>Delete</button>
+            <button onClick={() => onEdit(row)}>Edit</button> {/* Pass full row object here */}
+            <button onClick={() => onDelete(row.title)}>Delete</button>
           </td>
         </tr>
       ))}
     </tbody>
   </table>
 );
+
 
 export default AdminTable;

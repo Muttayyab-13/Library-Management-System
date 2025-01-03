@@ -17,18 +17,23 @@ const getGenres = async (req, res) => {
 
 
 const addGenre = async (req, res) => {
-  const { name, description } = req.body;
+  const { id, name, description } = req.body; // Expecting id, name, and description in the body
   try {
-    const pool = await connectToDatabase();
+    const pool = await sql.connect(connectToDatabase);
+    // Insert the genre with id, name, and description
     await pool
       .request()
-      .input("name", sql.NVarChar, name)
-      .input("description", sql.NVarChar, description)
-      .query("INSERT INTO Genres (Name, Description) VALUES (@name, @description)");
+      .input("id", sql.Int, id) // Optionally pass id if required (if not auto-generated)
+      .input("name", sql.VarChar, name)
+      .input("description", sql.VarChar, description)
+      .query("INSERT INTO Genres (id, name, descriptions) VALUES (@id, @name, @description)");
+      
     res.status(201).json({ message: "Genre added successfully" });
   } catch (error) {
+    console.error("Error adding genre:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 module.exports = { getGenres, addGenre };

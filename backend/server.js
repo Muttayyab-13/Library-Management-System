@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const sql = require("mssql");
+require('dotenv').config();
+
 
 // Importing Routes
 const bookRoutes = require("./routes/bookRoutes");
@@ -55,6 +57,7 @@ app.use("/genres", genreRoutes);
 app.use("/admin", adminRoutes);
 app.use("/register", userRoutes);
 app.use("/signIn", userRoutes);
+app.use("/users", userRoutes);
 
 // Start the Server
 const port = 3001;

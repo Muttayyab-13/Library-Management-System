@@ -1,57 +1,76 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
+import { getGenres } from '../../services/api';
 
 const ManageGenres = () => {
   const [genres, setGenres] = useState([]);
+  const [id, setId] = useState('');
   const [genreName, setGenreName] = useState('');
+  const [description, setDescription] = useState('');
 
   useEffect(() => {
     // Fetch all genres from the backend
-    axios.get('/api/genres')
-      .then(response => setGenres(response.data))
-      .catch(error => console.log(error));
+    getGenres().then(setGenres).catch(console.error);
   }, []);
 
   const handleCreate = () => {
-    const newGenre = { name: genreName };
-    axios.post('/api/genres', newGenre)
-      .then(response => {
-        setGenres([...genres, response.data]); // Add the new genre to the list
-        setGenreName(''); // Clear input field after creation
-      })
-      .catch(error => console.log(error));
+    if (!id || !genreName || !description) {
+      // Alert if any field is missing
+      alert('Please fill all fields.');
+      return;
+    }
+  
+    const newGenre = { id, name: genreName, descriptions: description };
+  
+    try {
+      // Send the POST request to create a new genre
+      axios.post('http://localhost:3001/genres', newGenre)  // Adjust the URL based on your endpoint
+        .then(response => {
+          setGenres([...genres, response.data]); // Add the new genre to the list
+          setId(''); // Clear id input field
+          setGenreName(''); // Clear name input field
+          setDescription(''); // Clear description input field
+          alert('Genre Created Successfully'); // Success alert
+        })
+        .catch(error => {
+          console.log(error);
+          alert('Failed to create genre. Please try again.'); // Error alert
+        });
+    } catch (error) {
+      console.log(error);
+      alert('An unexpected error occurred.'); // General error alert
+    }
   };
-
-  const handleDelete = (id) => {
-    axios.delete(`/api/genres/${id}`)
-      .then(response => {
-        setGenres(genres.filter(genre => genre.id !== id)); // Remove the deleted genre
-      })
-      .catch(error => console.log(error));
-  };
-
-  const handleUpdate = (id) => {
-    const updatedGenre = { name: genreName };
-    axios.put(`/api/genres/${id}`, updatedGenre)
-      .then(response => {
-        setGenres(genres.map(genre => (genre.id === id ? { ...genre, name: genreName } : genre))); // Update the genre in the list
-        setGenreName(''); // Clear input field after update
-      })
-      .catch(error => console.log(error));
-  };
-
+  
   return (
     <div>
       <h2>Manage Genres</h2>
       
-      {/* Input to create/update genre */}
+      {/* Input to create genre */}
       <div>
+        <TextField 
+          label="ID" 
+          value={id} 
+          onChange={(e) => setId(e.target.value)} 
+          fullWidth 
+          style={{ marginBottom: '10px' }} 
+        />
         <TextField 
           label="Genre Name" 
           value={genreName} 
           onChange={(e) => setGenreName(e.target.value)} 
           fullWidth 
+          style={{ marginBottom: '10px' }} 
+        />
+        <TextField 
+          label="Description" 
+          value={description} 
+          onChange={(e) => setDescription(e.target.value)} 
+          fullWidth 
+          multiline 
+          rows={4} 
+          style={{ marginBottom: '10px' }} 
         />
         <Button 
           onClick={handleCreate} 
@@ -67,38 +86,17 @@ const ManageGenres = () => {
         <Table>
           <TableHead>
             <TableRow>
+              <TableCell>ID</TableCell>
               <TableCell>Genre Name</TableCell>
-              <TableCell>Actions</TableCell>
+              <TableCell>Description</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {genres.map((genre) => (
               <TableRow key={genre.id}>
+                <TableCell>{genre.id}</TableCell>
                 <TableCell>{genre.name}</TableCell>
-                <TableCell>
-                  {/* Update genre */}
-                  <Button 
-                    onClick={() => setGenreName(genre.name)} 
-                    color="secondary"
-                  >
-                    Edit
-                  </Button>
-                  {/* Delete genre */}
-                  <Button 
-                    onClick={() => handleDelete(genre.id)} 
-                    color="error"
-                  >
-                    Delete
-                  </Button>
-                  {/* Update genre after editing */}
-                  <Button 
-                    onClick={() => handleUpdate(genre.id)} 
-                    color="primary"
-                    style={{ marginLeft: '10px' }}
-                  >
-                    Update
-                  </Button>
-                </TableCell>
+                <TableCell>{genre.descriptions}</TableCell>
               </TableRow>
             ))}
           </TableBody>

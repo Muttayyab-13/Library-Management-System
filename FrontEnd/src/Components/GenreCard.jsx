@@ -25,7 +25,7 @@ const GenreCard = ({ genre, books }) => {
           {books
             .filter((book) => book.genre === genre.name)
             .map((book) => (
-              <li key={book.id}>{book.title}</li>
+              <li key={book.title}>{book.title}</li>
             ))}
         </ul>
       )}

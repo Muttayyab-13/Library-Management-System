@@ -8,7 +8,6 @@ const AdminSidebar = () => (
       <li><Link to="/admin/manage-books">Manage Books</Link></li>
       <li><Link to="/admin/manage-users">Manage Users</Link></li>
       <li><Link to="/admin/manage-genres">Manage Genres</Link></li>
-      <li><Link to="/admin/manage-borrow-records">Manage Borrow Records</Link></li>
     </ul>
   </aside>
 );

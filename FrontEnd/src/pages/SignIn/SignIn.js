@@ -35,6 +35,7 @@ const handleSubmit = async (e) => {
       console.log(user);  // Destructure the token and user data
       localStorage.setItem("token", token); // Store the token securely
 console.log(user.email);
+console.log("USER ID"+user.id);
 
       // Check if the user is an admin
       if (user.email.toLowerCase() === 'admin@gmail.com'.toLowerCase())
