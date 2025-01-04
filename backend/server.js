@@ -58,6 +58,7 @@ app.use("/admin", adminRoutes);
 app.use("/register", userRoutes);
 app.use("/signIn", userRoutes);
 app.use("/users", userRoutes);
+app.use("/fines", userRoutes);
 
 // Start the Server
 const port = 3001;

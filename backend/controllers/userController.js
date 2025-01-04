@@ -111,22 +111,35 @@ const deleteUser = async (req, res) => {
   }
 };
 
-
-  
 const getNotifications = async (req, res) => {
   try {
-    // Assume `userId` is passed as a query parameter
-    const userId = req.query.userId;
+    const {userId} =req.query; 
+    // Extract userId from request body
+    console.log("Received userId:", userId);  // Debugging log
 
+    // Check if userId is provided
     if (!userId) {
       return res.status(400).json({ error: 'UserId is required' });
     }
 
-    const result = await sql.query`
-      SELECT * 
-      FROM Notifications 
-      WHERE userId = ${userId} AND isRead = 0
-    `;
+    // Connect to the database
+    const pool = await sql.connect(connectToDatabase);
+
+    // Test the connection
+    const testConnection = await pool.request().query('SELECT 1 AS test');
+    console.log('Database connection test:', testConnection.recordset);
+
+    // Query for unread notifications
+    const result = await pool.request()
+      .input('userId', sql.Int, userId)  // Safely bind the userId parameter
+      .query(`
+        SELECT * 
+        FROM Notifications 
+        WHERE userId = @userId AND isRead = 0
+      `);
+
+    // Log the result for debugging
+    console.log('Notifications found:', result.recordset);
 
     // Check if notifications exist
     if (result.recordset.length === 0) {
@@ -134,37 +147,49 @@ const getNotifications = async (req, res) => {
     }
 
     // Return the notifications in the response
-    res.json(result.recordset);
+    return res.json(result.recordset);
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    console.error('Error fetching notifications:', error.message);
     res.status(500).json({ error: 'Error fetching notifications' });
   }
 };
+
+
+
 // Endpoint to mark a notification as read
 
   
 
 const markAsRead = async (req, res) => {
+  const notificationId = req.params.id;
+  const notificationIdInt = parseInt(notificationId, 10);
+
+  // Ensure the ID is valid
+  if (isNaN(notificationIdInt)) {
+    return res.status(400).json({ error: 'Invalid notification ID' });
+  }
+
   try {
-    const notificationId = req.params.id;
-    const notificationIdInt = parseInt(notificationId, 10);
+    // Connect to the database using your connection settings
+    const pool = await sql.connect(connectToDatabase);
 
-    // Ensure the ID is valid
-    if (isNaN(notificationIdInt)) {
-      return res.status(400).json({ error: 'Invalid notification ID' });
-    }
+    // Start a transaction using the connection object, not the pool directly
+    const transaction = new sql.Transaction(pool);
 
-    // Start a transaction
-    const transaction = await sql.beginTransaction();
+    await transaction.begin(); // Start the transaction
 
     try {
       // SQL query to update the notification
-      await sql.query`UPDATE Notifications
-                      SET isRead = 1
-                      WHERE id = ${notificationIdInt}`;
+      await transaction.request().query(`
+        UPDATE Notifications
+        SET isRead = 1
+        WHERE id = ${notificationIdInt}
+      `);
 
       // Retrieve the updated notification
-      const result = await sql.query`SELECT * FROM [Notifications] WHERE id = ${notificationIdInt}`;
+      const result = await transaction.request().query(`
+        SELECT * FROM Notifications WHERE id = ${notificationIdInt}
+      `);
 
       // Check if notification exists
       if (result.recordset.length === 0) {
@@ -174,7 +199,6 @@ const markAsRead = async (req, res) => {
 
       // Commit the transaction if everything is successful
       await transaction.commit();
-
       res.status(200).json({ message: 'Notification marked as read' });
 
     } catch (error) {
@@ -182,10 +206,40 @@ const markAsRead = async (req, res) => {
       console.error('Error during transaction:', error);
       res.status(500).json({ error: 'Error updating notification' });
     }
-
   } catch (error) {
-    console.error('Error updating notification:', error);
+    console.error('Error setting up transaction:', error);
     res.status(500).json({ error: 'Error updating notification' });
+  }
+};
+
+const handleFinePayment = async (userId, bookTitle) => {
+  // Step 1: Connect to the database
+  const pool = await sql.connect(connectToDatabase);
+
+  console.log(`Processing fine payment for Book: ${bookTitle} and User: ${userId}`);
+
+  try {
+    // Step 2: Verify if there's a fine for the given userId and bookTitle
+    const result = await pool.request().query(`
+      SELECT * FROM Fines 
+      WHERE userId = ${userId} AND book_title = '${bookTitle}'
+    `);
+
+    // If no fine exists, return an error
+    if (result.recordset.length === 0) {
+      throw new Error('Fine not found for the given user and book');
+    }
+
+    // Step 3: Delete the fine from the Fines table
+    await pool.request().query(`
+      DELETE FROM Fines 
+      WHERE userId = ${userId} AND book_title = '${bookTitle}'
+    `);
+
+    console.log(`Fine for Book: ${bookTitle} has been deleted.`);
+  } catch (error) {
+    console.error('Error processing the fine payment:', error);
+    throw error; // Propagate error to be handled by the route
   }
 };
 
@@ -193,5 +247,4 @@ const markAsRead = async (req, res) => {
 
 
 
-
-module.exports = { registerUser,signInUser,getAllUsers,deleteUser,markAsRead,getNotifications};
+module.exports = { registerUser,signInUser,getAllUsers,deleteUser,markAsRead,getNotifications,handleFinePayment};

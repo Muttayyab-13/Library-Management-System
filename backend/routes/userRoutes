@@ -2,7 +2,7 @@ const express = require("express");
 
 const sql = require("mssql");
 
-const {registerUser, signInUser,getAllUsers,deleteUser,markAsRead,getNotifications} = require("../controllers/userController");
+const {registerUser, signInUser,getAllUsers,deleteUser,markAsRead,getNotifications,handleFinePayment} = require("../controllers/userController");
 
 const router = express.Router();
 
@@ -12,7 +12,20 @@ router.post("/user",signInUser)
 router.get('/all', getAllUsers);
 router.delete('/delete/:id',deleteUser);
 router.patch('/notifications/:id', markAsRead);
-router.get('notifications/:id', getNotifications);
+router.get('/notifications', getNotifications);
+
+// Route to handle fine payment
+router.delete('/:userId/:bookTitle', async (req, res) => {
+  const { userId, bookTitle } = req.params;
+
+  try {
+    await handleFinePayment(userId, bookTitle);  // Call controller function
+    res.status(200).json({ message: `Fine for Book: ${bookTitle} has been paid and removed.` });
+  } catch (error) {
+    console.error('Error handling fine payment:', error);
+    res.status(500).json({ error: 'Error processing the fine payment.' });
+  }
+});
  
 
 

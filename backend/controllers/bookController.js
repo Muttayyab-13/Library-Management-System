@@ -1,5 +1,6 @@
 const sql=require('mssql');
 const { connectToDatabase } = require('../server'); // Ensure this is importing your connection function
+const { parse } = require('dotenv');
 
 
 const getAllBooks = async (req, res) => {
@@ -49,7 +50,9 @@ const getFeaturedBooks = async (req, res) => {
       .query(`SELECT b.title,a.name AS author
         FROM BooksCopies1 b
         join Authors a on a.id=b.author_id
-        WHERE is_featured = 1`); // Adjust this query based on your schema
+        WHERE is_featured = 1`);
+        
+        // Adjust this query based on your schema
     // Return the result of the query as a JSON response
     res.status(200).json(result.recordset); // recordset contains the rows returned from the query
   } catch (error) {
@@ -133,15 +136,20 @@ const borrowBook = async (req, res) => {
   try {
     const pool = await sql.connect(connectToDatabase);
 
+// Check if the book exists and if it's available (noOfCopies > 0)
+const book = await pool.request()
+.input('bookTitle', sql.VarChar, bookTitle)
+.query('SELECT * FROM BooksCopies1 WHERE title = @bookTitle AND noOfCopies > 0');
 
-    // Check if the book exists and if it's already borrowed
-    const book = await pool.request()
-      .input('bookTitle', sql.VarChar, bookTitle)
-      .query('SELECT * FROM BooksCopies1 WHERE title= @bookTitle AND noOfCopies > 0');
 
-    if (book.recordset.length === 0) {
-      return res.status(400).json({ message: "Book not available or already borrowed" });
-    }
+// Check if the book is already borrowed
+const book2 = await pool.request()
+.input('bookTitle', sql.VarChar, bookTitle)
+.query('SELECT * FROM borrowRecords WHERE book_title = @bookTitle AND Status = 1');  // Status 1 means borrowed
+
+if (book.recordset.length === 0 || book2.recordset.length > 0) {
+return res.status(400).json({ message: "Book not available or already borrowed" });
+}
 
     // Mark the book as borrowed
     await pool.request()
@@ -184,12 +192,8 @@ const returnBook = async (req, res) => {
     await pool.request()
       .input('bookTitle', sql.VarChar, bookTitle)
       .query('UPDATE BooksCopies1 SET noOfCopies = noOfCopies + 1 WHERE title = @bookTitle');
-      await pool.request()
-      .input('bookTitle', sql.VarChar, bookTitle)
-      .input('userId', sql.Int, userId)
-      .input('today', sql.DateTime, today)
-      .query('UPDATE borrowRecords SET actualReturnDate = @today, Status = 0 WHERE user_id = @userId AND book_title = @bookTitle AND Status = 1');  // Status 0 means returned
 
+      
     // Update the borrowRecords table to mark the book as returned
     await pool.request()
       .input('bookTitle', sql.VarChar, bookTitle)
@@ -400,61 +404,107 @@ const deleteBook = async (req, res) => {
 
 // Route to get overdue books and send notifications
   
-  const overdueBooks=async (req, res) => {
+const overdueBooks = async (req, res) => {
+  const { userId } = req.query;
   const currentDate = new Date();
+
   try {
     // Establish a connection to the database
     const pool = await sql.connect(connectToDatabase);
 
-    // Query to find all overdue books (those that have not been returned yet and the returnDate has passed)
+    // Query to find overdue books for a specific user
     const result = await pool.request()
+      .input('userId', sql.Int, userId)
       .input('currentDate', sql.DateTime, currentDate)
       .query(`
         SELECT * 
         FROM borrowRecords
-        WHERE actualReturnDate IS NULL  
-          AND returnDate < @currentDate;  
+        WHERE user_id = @userId AND returnDate < @currentDate AND Status = 1;
       `);
 
     const overdueBooks = result.recordset;
 
+    if (overdueBooks.length === 0) {
+      return res.status(200).json({ message: "No overdue books for this user" });
+    }
+
     // Process overdue books, calculate fines and send notifications
     const overdueWithFines = [];
-    
-    for (let book of overdueBooks) {
+
+    // Use Promise.all to execute queries in parallel
+    const promises = overdueBooks.map(async (book) => {
       const fine = calculateFine(book.returnDate, currentDate);  // Calculate fine based on overdue days
 
       if (fine > 0) {
-        // Insert the fine into the Fines table
-        await pool.request()
-          .input('userId', sql.Int, book.userId)
-          .input('bookTitle', sql.VarChar, book.title)
-          .input('fineAmount', sql.Decimal, fine)
-          .input('fineDate', sql.DateTime, currentDate)
-          .query(`
-            INSERT INTO Fines (userId, book_title, fineAmount, fineDate)
-            VALUES (@userId, @bookTitle, @fineAmount, @fineDate);
-          `);
+        try {
+          // Check if the fine already exists for the user and the book
+          const [existingFine, existingNotification] = await Promise.all([
+            pool.request()
+              .input('userId', sql.Int, book.user_id)
+              .input('bookTitle', sql.VarChar, book.book_title)
+              .input('fineAmount', sql.Decimal, fine)
+              .query(`
+                SELECT COUNT(*) AS fineExists
+                FROM Fines
+                WHERE userId = @userId
+                AND book_title = @bookTitle
+                AND fineAmount = @fineAmount;
+              `),
+              
+            pool.request()
+              .input('userId', sql.Int, book.user_id)
+              .input('message', sql.VarChar, `Your book "${book.book_title}" is overdue. A fine of $${fine} has been applied.`)
+              .query(`
+                SELECT COUNT(*) AS notificationExists
+                FROM Notifications
+                WHERE userId = @userId
+                AND message = @message;
+              `)
+          ]);
+
+          // If fine doesn't exist, insert it
+          if (existingFine.recordset[0].fineExists === 0) {
+            await pool.request()
+              .input('userId', sql.Int, book.user_id)
+              .input('bookTitle', sql.VarChar, book.book_title)
+              .input('fineAmount', sql.Decimal, fine)
+              .input('fineDate', sql.DateTime, currentDate)
+              .query(`
+                INSERT INTO Fines (userId, book_title, fineAmount, fineDate)
+                VALUES (@userId, @bookTitle, @fineAmount, @fineDate);
+              `);
+          }
+
+          // If notification doesn't exist, insert it
+          if (existingNotification.recordset[0].notificationExists === 0) {
+            await pool.request()
+              .input('userId', sql.Int, book.user_id)
+              .input('message', sql.VarChar, `Your book "${book.book_title}" is overdue. A fine of $${fine} has been applied.`)
+              .input('notificationDate', sql.DateTime, currentDate)
+              .query(`
+                INSERT INTO Notifications (userId, message, notificationDate)
+                VALUES (@userId, @message, @notificationDate);
+              `);
+          }
+
+          // Add the fine information to the overdueBooks list
+          overdueWithFines.push({
+            ...book,
+            fine: fine
+          });
+
+        } catch (err) {
+          console.error('Error processing book:', book.book_title, err);
+        }
       }
+    });
 
-      // Insert a notification for the overdue book
-      await pool.request()
-        .input('userId', sql.Int, book.userId)
-        .input('message', sql.VarChar, `Your book "${book.title}" is overdue. A fine of $${fine} has been applied.`)
-        .input('notificationDate', sql.DateTime, currentDate)
-        .query(`
-          INSERT INTO Notifications (userId, message, notificationDate)
-          VALUES (@userId, @message, @notificationDate);
-        `);
+    // Wait for all queries to complete
+    await Promise.all(promises);
 
-      // Add the fine information to the overdueBooks list
-      overdueWithFines.push({
-        ...book,
-        fine: fine
-      });
-    }
+    // Return the list of overdue books with fines
+    res.json(overdueWithFines);
 
-    res.json(overdueWithFines);  // Return the list of overdue books with fines
   } catch (error) {
     console.error('Error fetching overdue books:', error);
     res.status(500).json({ error: 'Error fetching overdue books' });
@@ -466,6 +516,8 @@ const calculateFine = (returnDate, currentDate) => {
   const difference = Math.ceil((currentDate - new Date(returnDate)) / (1000 * 3600 * 24));  // Difference in days
   return difference > 0 ? difference * 1 : 0;  // Assuming a fine of $1 per day overdue
 };
+
+
 
 
 

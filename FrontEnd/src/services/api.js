@@ -144,15 +144,6 @@ export const searchBooks = async (query) => {
  
   
 
-  export const getUserNotifications = async () => {
-    const res = await fetch(`${API_URL}/notifications/user`);
-    return res.json();
-  };
-
-  export const getUserBorrowRecords = async () => {
-    const res = await fetch(`${API_URL}/borrow-records/user`);
-    return res.json();
-  };
 
 
  

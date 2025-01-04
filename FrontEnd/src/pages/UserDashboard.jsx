@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
 import NotificationCard from "../Components/NotificationCard";
-import { getUserNotifications, getBorrowedBooks } from "../services/api";
+import {  getBorrowedBooks } from "../services/api";
 import { jwtDecode } from "jwt-decode";
-import Notifications from "../Components/NotificationCard";
 import ManageOverdueBooks from "./ManageOverdueBooks";
 
 const UserDashboard = () => {
   const [notifications, setNotifications] = useState([]);
   const [borrowRecords, setBorrowRecords] = useState([]);
   const [userEmail, setUserEmail] = useState("");
-  const [userId, setUserId] = useState(null);  // Initialize as null to check later if the value is set
+  const [userId, setUserId] = useState();  // Initialize as null to check later if the value is set
 
   useEffect(() => {
     // Get the JWT token from localStorage
@@ -27,9 +26,9 @@ const UserDashboard = () => {
   useEffect(() => {
     if (userId) {
       // Fetch notifications and borrowed books when userId is available
-      getUserNotifications()
-        .then((data) => setNotifications(data))
-        .catch((error) => console.error("Error fetching notifications:", error));
+      //getUserNotifications()
+       // .then((data) => setNotifications(data))
+       // .catch((error) => console.error("Error fetching notifications:", error));
 
       getBorrowedBooks(userId)
         .then((data) => setBorrowRecords(data))
@@ -40,9 +39,8 @@ const UserDashboard = () => {
   return (
     <div>
       <h1>User Dashboard =={'>'}{userEmail}</h1>
-      <h2>Notifications</h2>
       <div className="notification-list">
-      <Notifications />
+      <NotificationCard/>
       </div>
       <div>
         <ManageOverdueBooks/>

@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { jwtDecode } from "jwt-decode";
 
-const Notifications = () => {
+const NotificationCard = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(null);  // Initialize as null to check later if the value is set
+  const [userId, setUserId] = useState(); // Initialize as null to check later if the value is set
+  const [userEmail,setUserEmail]=useState('') // Initialize as null to check later if the value is set
 
   useEffect(() => {
 
@@ -21,17 +23,22 @@ const Notifications = () => {
   }, []);
 
   useEffect(() => {
-    
-    axios.get(`http://localhost:3001/users/notifications?userId=${userId}`)
+    // Make sure userId is available before sending the request
+    if (userId) {
+      axios.get('http://localhost:3001/users/notifications', {
+        params: { userId }  // Pass userId as a query parameter
+      })
       .then((response) => {
-        setNotifications(response.data);
-        setLoading(false);
+        setNotifications(response.data); // Set notifications from the response
+        setLoading(false); // Stop loading
       })
       .catch((error) => {
         console.error("Error fetching notifications:", error);
-        setLoading(false);
+        setLoading(false); // Stop loading even on error
       });
-  }, []);
+    }
+  }, [userId]);  // Dependency array should depend on userId
+  
 
   const handleMarkAsRead = (notificationId) => {
     // Mark notification as read (adjusted to the correct PATCH endpoint)
@@ -70,4 +77,4 @@ const Notifications = () => {
   );
 };
 
-export default Notifications;
+export default NotificationCard;

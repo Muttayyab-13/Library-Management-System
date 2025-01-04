@@ -1,5 +1,5 @@
 import React, { use, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";  // Import jwt-decode
+import { jwtDecode } from "jwt-decode";
 import BookCard from "../Components/BookCard";
 import GenreCard from "../Components/GenreCard";
 import { getFeaturedBooks, getGenres, getAllBooks,getBorrowedBooks } from "../services/api";
@@ -145,7 +145,6 @@ const handleBorrowBook = (bookTitle, userId) => {
               book={book}
               onBorrow={() => handleBorrowBook(book.title, userId)}  // Correctly pass borrow handler
             />
-           
           ))
         ) : (
           <p>No books available.</p>
