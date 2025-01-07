@@ -17,11 +17,17 @@ const registerUser= async (req, res) => {
       .input('LastName', sql.VarChar, LastName)
       .input('Email', sql.VarChar, Email)
       .input('Password', sql.VarChar, Password)
-      .input('confirmPassword', sql.VarChar, confirmPassword)
+      //.input('confirmPassword', sql.VarChar, confirmPassword)
       .query(`
-        INSERT INTO Users (FirstName, LastName, Email, Password, confirmPassword) 
-        VALUES (@FirstName, @LastName, @Email, @Password, @confirmPassword)
+        INSERT INTO Users (FirstName, LastName, Email, Password) 
+        VALUES (@FirstName, @LastName, @Email, @Password)
       `);
+
+        await pool.request()
+        .input('confirmPassword', sql.VarChar, confirmPassword)
+        .query(`Insert into Passwords (confirmPassword) values (@confirmPassword)`);
+
+
 
     res.status(201).json({ message: 'User created successfully!' });
   } catch (error) {
@@ -103,6 +109,10 @@ const deleteUser = async (req, res) => {
     await pool.request()
       .input('id', sql.Int, id)
       .query('DELETE FROM Users WHERE id = @id');
+
+    await pool.request()
+    .input('id', sql.Int, id)
+    .query('DELETE FROM Passwords WHERE id = @id');
 
     res.json({ message: 'User deleted successfully' });
   } catch (error) {

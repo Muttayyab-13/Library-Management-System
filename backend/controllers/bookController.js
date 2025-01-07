@@ -143,11 +143,12 @@ const book = await pool.request()
 
 
 // Check if the book is already borrowed
-const book2 = await pool.request()
-.input('bookTitle', sql.VarChar, bookTitle)
-.query('SELECT * FROM borrowRecords WHERE book_title = @bookTitle AND Status = 1');  // Status 1 means borrowed
+//const book2 = await pool.request()
+//.input('bookTitle', sql.VarChar, bookTitle)
+//.query('SELECT * FROM borrowRecords WHERE book_title = @bookTitle AND Status = 1');  // Status 1 means borrowed
+//| book2.recordset.length > 0
 
-if (book.recordset.length === 0 || book2.recordset.length > 0) {
+if (book.recordset.length === 0) {
 return res.status(400).json({ message: "Book not available or already borrowed" });
 }
 

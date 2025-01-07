@@ -22,7 +22,7 @@ const dbConfig = {
   user: 'sa',
   password: '1234',
   server: 'localhost',
-  database: 'project',
+  database: 'ProjectORG',
   port: 1433,
   options: {
     encrypt: false,

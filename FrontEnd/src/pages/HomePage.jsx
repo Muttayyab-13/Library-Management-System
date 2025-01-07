@@ -147,7 +147,7 @@ const handleBorrowBook = (bookTitle, userId) => {
             />
           ))
         ) : (
-          <p>No books available.</p>
+          <p>Please check all books.</p>
         )}
       </section>
 
