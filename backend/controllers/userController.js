@@ -23,9 +23,9 @@ const registerUser= async (req, res) => {
         VALUES (@FirstName, @LastName, @Email, @Password)
       `);
 
-        await pool.request()
-        .input('confirmPassword', sql.VarChar, confirmPassword)
-        .query(`Insert into Passwords (confirmPassword) values (@confirmPassword)`);
+       // await pool.request()
+       // .input('confirmPassword', sql.VarChar, confirmPassword)
+       // .query(`Insert into Passwords (confirmPassword) values (@confirmPassword)`);
 
 
 
